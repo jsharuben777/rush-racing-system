@@ -1,0 +1,9 @@
+{
+  "SolutionRoot": "C:\\Users\\User\\Desktop\\rush_management_system-main\\rush_management_system-main",
+  "WebProjectRelativePath": "src\\RushRacing.Web",
+  "KioskProjectRelativePath": "src\\RushRacing.Kiosk",
+  "LocalPort": 5233,
+  "CloudflaredExePath": "cloudflared",
+  "SecondsToWaitForTunnelUrl": 30,
+  "SecondsToWaitBeforeStartingKiosk": 8
+}

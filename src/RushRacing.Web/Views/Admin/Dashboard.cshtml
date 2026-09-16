@@ -1,0 +1,337 @@
+﻿@{
+    Layout = null;
+    var machines = ViewBag.Machines as List<RushRacing.Core.Entities.Machine>;
+    var activeSessions = ViewBag.ActiveSessions as List<RushRacing.Core.Entities.Session>;
+    var recentEvents = ViewBag.RecentEvents as List<RushRacing.Core.Entities.SessionEvent>;
+    int todaySessions = ViewBag.TodaySessions;
+    decimal todayRevenue = ViewBag.TodayRevenue;
+    decimal weekRevenue = ViewBag.WeekRevenue;
+    decimal monthRevenue = ViewBag.MonthRevenue;
+}
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Rush Racing — Control Center</title>
+    <meta http-equiv="refresh" content="15" />
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            background: #0a0a1a;
+            color: white;
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 30px;
+        }
+
+        .logo {
+            font-size: 24px;
+            font-weight: 900;
+            color: #ff3333;
+        }
+
+        .nav a {
+            color: #888;
+            text-decoration: none;
+            margin-left: 20px;
+            font-size: 14px;
+        }
+
+            .nav a:hover {
+                color: white;
+            }
+
+            .nav a.active {
+                color: #ff3333;
+            }
+
+        .stats-row {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 16px;
+            margin-bottom: 30px;
+        }
+
+        .stat-card {
+            background: #1a1a2e;
+            border-radius: 14px;
+            padding: 20px;
+        }
+
+        .stat-label {
+            color: #888;
+            font-size: 13px;
+            margin-bottom: 6px;
+        }
+
+        .stat-value {
+            font-size: 28px;
+            font-weight: 800;
+        }
+
+            .stat-value.revenue {
+                color: #28a745;
+            }
+
+        .section-title {
+            font-size: 18px;
+            font-weight: 700;
+            margin-bottom: 16px;
+            color: #ccc;
+        }
+
+        .machines-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 16px;
+            margin-bottom: 30px;
+        }
+
+        .machine-card {
+            background: #1a1a2e;
+            border-radius: 14px;
+            padding: 20px;
+            border-left: 4px solid #555;
+        }
+
+            .machine-card.online {
+                border-left-color: #28a745;
+            }
+
+            .machine-card.in-session {
+                border-left-color: #ff3333;
+            }
+
+            .machine-card.offline {
+                border-left-color: #666;
+            }
+
+            .machine-card.error {
+                border-left-color: #ff6600;
+            }
+
+        .machine-name {
+            font-size: 18px;
+            font-weight: 700;
+            margin-bottom: 4px;
+        }
+
+        .machine-status {
+            display: inline-block;
+            padding: 2px 10px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 700;
+        }
+
+        .status-online {
+            background: #1a3a1a;
+            color: #28a745;
+        }
+
+        .status-ready {
+            background: #1a3a1a;
+            color: #28a745;
+        }
+
+        .status-in-session {
+            background: #3a1a1a;
+            color: #ff3333;
+        }
+
+        .status-offline {
+            background: #2a2a2a;
+            color: #888;
+        }
+
+        .status-error {
+            background: #3a2a1a;
+            color: #ff6600;
+        }
+
+        .status-booting {
+            background: #1a2a3a;
+            color: #3399ff;
+        }
+
+        .machine-info {
+            color: #888;
+            font-size: 13px;
+            margin-top: 8px;
+        }
+
+        .events-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 30px;
+        }
+
+            .events-table th {
+                text-align: left;
+                padding: 10px 12px;
+                color: #888;
+                font-size: 12px;
+                border-bottom: 1px solid #2a2a4a;
+            }
+
+            .events-table td {
+                padding: 10px 12px;
+                font-size: 13px;
+                border-bottom: 1px solid #1a1a2e;
+                color: #ccc;
+            }
+
+        .event-type {
+            display: inline-block;
+            padding: 2px 8px;
+            border-radius: 6px;
+            font-size: 11px;
+            font-weight: 600;
+            background: #2a2a4a;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="header">
+        <div class="logo">🏁 RUSH RACING CONTROL CENTER</div>
+        <div class="nav">
+            <a href="/admin/dashboard" class="active">Dashboard</a>
+            <a href="/admin/sessions">Sessions</a>
+            <a href="/admin/machines">Machines</a>
+            <a href="/admin/revenue">Revenue</a>
+            <a href="/admin/events">Events</a>
+            <a href="/admin/logout">Logout</a>
+        </div>
+    </div>
+
+    <!-- Stats -->
+    <div class="stats-row">
+        <div class="stat-card">
+            <div class="stat-label">Today's Sessions</div>
+            <div class="stat-value">@todaySessions</div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-label">Today's Revenue</div>
+            <div class="stat-value revenue">RM @todayRevenue.ToString("F2")</div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-label">This Week</div>
+            <div class="stat-value revenue">RM @weekRevenue.ToString("F2")</div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-label">This Month</div>
+            <div class="stat-value revenue">RM @monthRevenue.ToString("F2")</div>
+        </div>
+    </div>
+
+    <!-- Machines -->
+    <div class="section-title">MACHINES</div>
+    <div class="machines-grid">
+        @foreach (var machine in machines)
+        {
+            var statusClass = machine.Status switch
+            {
+                RushRacing.Core.Enums.MachineStatus.Ready => "online",
+                RushRacing.Core.Enums.MachineStatus.InSession => "in-session",
+                RushRacing.Core.Enums.MachineStatus.Starting => "in-session",
+                RushRacing.Core.Enums.MachineStatus.GameSelect => "in-session",
+                RushRacing.Core.Enums.MachineStatus.Offline => "offline",
+                RushRacing.Core.Enums.MachineStatus.Error => "error",
+                _ => "offline"
+            };
+
+            var statusBadge = machine.Status switch
+            {
+                RushRacing.Core.Enums.MachineStatus.Ready => "status-ready",
+                RushRacing.Core.Enums.MachineStatus.InSession => "status-in-session",
+                RushRacing.Core.Enums.MachineStatus.Starting => "status-in-session",
+                RushRacing.Core.Enums.MachineStatus.GameSelect => "status-in-session",
+                RushRacing.Core.Enums.MachineStatus.Offline => "status-offline",
+                RushRacing.Core.Enums.MachineStatus.Error => "status-error",
+                RushRacing.Core.Enums.MachineStatus.Booting => "status-booting",
+                _ => "status-offline"
+            };
+
+            var activeSession = activeSessions?.FirstOrDefault(s => s.MachineId == machine.MachineId);
+
+            <a href="/admin/machine/@machine.MachineCode" style="text-decoration:none; color:inherit;">
+                <div class="machine-card @statusClass">
+                    <div style="display:flex; justify-content:space-between; align-items:center;">
+                        <div class="machine-name">@machine.DisplayName</div>
+                        <span class="machine-status @statusBadge">@machine.Status</span>
+                    </div>
+                    <div class="machine-info">@machine.MachineCode • @machine.Location?.Name</div>
+
+                    @if (activeSession != null)
+                    {
+                        <div style="margin-top:10px; padding:10px; background:#0a0a1a; border-radius:8px;">
+                            <div style="font-size:13px; color:#ff3333;">
+                                🏎️ @activeSession.SelectedGame?.DisplayName
+                            </div>
+                            <div style="font-size:12px; color:#888;">
+                                Session: @activeSession.SessionCode
+                                @if (activeSession.SessionExpiresAt.HasValue)
+                                {
+                                    var remaining = activeSession.SessionExpiresAt.Value - DateTimeOffset.UtcNow;
+                                    if (remaining > TimeSpan.Zero)
+                                    {
+                                        <span style="color:#ff3333;"> • @remaining.ToString(@"mm\:ss") remaining</span>
+                                    }
+                                }
+                            </div>
+                        </div>
+                    }
+
+                    @if (machine.LastHeartbeatAt.HasValue)
+                    {
+                        var ago = DateTimeOffset.UtcNow - machine.LastHeartbeatAt.Value;
+                        <div class="machine-info">Last seen: @((int)ago.TotalSeconds)s ago</div>
+                    }
+                </div>
+            </a>
+        }
+    </div>
+
+    <!-- Recent Events -->
+    <div class="section-title">RECENT EVENTS</div>
+    <table class="events-table">
+        <thead>
+            <tr>
+                <th>Time</th>
+                <th>Machine</th>
+                <th>Event</th>
+                <th>Details</th>
+                <th>Source</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var evt in recentEvents)
+            {
+                <tr>
+                    <td>@evt.CreatedAt.ToLocalTime().ToString("HH:mm:ss")</td>
+                    <td>@evt.Machine?.MachineCode</td>
+                    <td><span class="event-type">@evt.EventType</span></td>
+                    <td>@evt.Details</td>
+                    <td>@evt.Source</td>
+                </tr>
+            }
+        </tbody>
+    </table>
+
+</body>
+</html>

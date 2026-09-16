@@ -1,0 +1,38 @@
+﻿<UserControl x:Class="RushRacing.Kiosk.Views.CompletingView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+    <Grid Background="#0A0A1A">
+        <StackPanel VerticalAlignment="Center" HorizontalAlignment="Center">
+
+            <TextBlock Text="🏁"
+                       FontSize="64"
+                       HorizontalAlignment="Center"
+                       Margin="0,0,0,10"/>
+
+            <TextBlock Text="SESSION COMPLETE"
+                       Foreground="#28A745"
+                       FontSize="42"
+                       FontWeight="Bold"
+                       HorizontalAlignment="Center"
+                       Margin="0,0,0,20"/>
+
+            <TextBlock Text="Thank you for racing with"
+                       Foreground="#888888"
+                       FontSize="22"
+                       HorizontalAlignment="Center"/>
+
+            <TextBlock Text="RUSH RACING"
+                       Foreground="#FF3333"
+                       FontSize="30"
+                       FontWeight="Bold"
+                       HorizontalAlignment="Center"
+                       Margin="0,0,0,40"/>
+
+            <TextBlock Text="Please exit the cockpit."
+                       Foreground="White"
+                       FontSize="24"
+                       HorizontalAlignment="Center"/>
+
+        </StackPanel>
+    </Grid>
+</UserControl>

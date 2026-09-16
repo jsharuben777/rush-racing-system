@@ -1,0 +1,148 @@
+﻿@{
+    Layout = null;
+    var events = ViewBag.Events as List<RushRacing.Core.Entities.SessionEvent>;
+    int currentPage = ViewBag.CurrentPage;
+    int totalPages = ViewBag.TotalPages;
+}
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Rush Racing — Events</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            background: #0a0a1a;
+            color: white;
+            padding: 20px;
+        }
+
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 30px;
+        }
+
+        .logo {
+            font-size: 24px;
+            font-weight: 900;
+            color: #ff3333;
+        }
+
+        .nav a {
+            color: #888;
+            text-decoration: none;
+            margin-left: 20px;
+            font-size: 14px;
+        }
+
+            .nav a:hover {
+                color: white;
+            }
+
+            .nav a.active {
+                color: #ff3333;
+            }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        th {
+            text-align: left;
+            padding: 10px;
+            color: #888;
+            font-size: 12px;
+            border-bottom: 1px solid #2a2a4a;
+        }
+
+        td {
+            padding: 10px;
+            font-size: 13px;
+            border-bottom: 1px solid #1a1a2e;
+            color: #ccc;
+        }
+
+        .pagination {
+            margin-top: 20px;
+            text-align: center;
+        }
+
+            .pagination a {
+                color: #888;
+                margin: 0 6px;
+                text-decoration: none;
+                padding: 6px 12px;
+                border-radius: 8px;
+            }
+
+                .pagination a.current {
+                    background: #ff3333;
+                    color: white;
+                }
+    </style>
+</head>
+<body>
+
+    <div class="header">
+        <div class="logo">🏁 RUSH RACING</div>
+        <div class="nav">
+            <a href="/admin/dashboard">Dashboard</a>
+            <a href="/admin/sessions">Sessions</a>
+            <a href="/admin/machines">Machines</a>
+            <a href="/admin/revenue">Revenue</a>
+            <a href="/admin/events" class="active">Events</a>
+            <a href="/admin/logout">Logout</a>
+        </div>
+    </div>
+
+    <h2 style="margin-bottom:16px;">Event Log</h2>
+
+    <table>
+        <thead>
+            <tr>
+                <th>Time</th>
+                <th>Machine</th>
+                <th>Session</th>
+                <th>Event</th>
+                <th>Details</th>
+                <th>Source</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var evt in events)
+            {
+                <tr>
+                    <td>@evt.CreatedAt.ToLocalTime().ToString("dd/MM HH:mm:ss")</td>
+                    <td>@(evt.Machine?.MachineCode ?? "-")</td>
+                    <td>@(evt.Session?.SessionCode ?? "-")</td>
+                    <td>@evt.EventType</td>
+                    <td>@evt.Details</td>
+                    <td>@evt.Source</td>
+                </tr>
+            }
+        </tbody>
+    </table>
+
+    @if (totalPages > 1)
+    {
+        <div class="pagination">
+            @for (int i = 1; i <= totalPages; i++)
+            {
+                <a href="/admin/events?page=@i" class="@(i == currentPage ? "current" : "")">@i</a>
+            }
+        </div>
+    }
+
+</body>
+</html>

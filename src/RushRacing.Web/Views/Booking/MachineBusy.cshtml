@@ -1,0 +1,49 @@
+﻿@model RushRacing.Core.Entities.Machine
+@{
+    Layout = null;
+}
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Rush Racing — Machine Busy</title>
+    <style>
+        body {
+            font-family: -apple-system, sans-serif;
+            background: #0a0a1a;
+            color: white;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            margin: 0;
+            text-align: center;
+            padding: 20px;
+        }
+
+        .icon {
+            font-size: 48px;
+            margin-bottom: 16px;
+        }
+
+        h1 {
+            font-size: 22px;
+            margin-bottom: 12px;
+        }
+
+        p {
+            color: #888;
+            font-size: 14px;
+        }
+    </style>
+</head>
+<body>
+    <div>
+        <div class="icon">🏎️</div>
+        <h1>@Model.DisplayName is currently in use</h1>
+        <p>Please wait for the current session to end, then scan the QR code again.</p>
+    </div>
+</body>
+</html>

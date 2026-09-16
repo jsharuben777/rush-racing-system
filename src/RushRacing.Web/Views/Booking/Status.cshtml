@@ -1,0 +1,80 @@
+﻿@model RushRacing.Core.Entities.Session
+@{
+    Layout = null;
+}
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Rush Racing — Session @Model.SessionCode</title>
+    <style>
+        body {
+            font-family: -apple-system, sans-serif;
+            background: #0a0a1a;
+            color: white;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            margin: 0;
+            text-align: center;
+            padding: 20px;
+        }
+
+        .status {
+            font-size: 18px;
+            font-weight: 700;
+            margin: 16px 0;
+        }
+
+        .info {
+            color: #888;
+            font-size: 14px;
+            margin: 8px 0;
+        }
+
+        .success {
+            color: #28a745;
+        }
+
+        .active {
+            color: #ff3333;
+        }
+
+        .pending {
+            color: #ffc107;
+        }
+    </style>
+</head>
+<body>
+    <div>
+        <div style="font-size:24px; font-weight:900; color:#ff3333;">🏁 RUSH RACING</div>
+        <div class="info">Session: @Model.SessionCode</div>
+
+        @switch (Model.Status)
+        {
+            case RushRacing.Core.Enums.SessionStatus.Paid:
+            case RushRacing.Core.Enums.SessionStatus.Starting:
+                <div class="status pending">⏳ Preparing your cockpit...</div>
+                <div class="info">Head to @Model.Machine.DisplayName and select your game!</div>
+                break;
+
+            case RushRacing.Core.Enums.SessionStatus.Active:
+                <div class="status active">🏎️ Session Active</div>
+                <div class="info">Time remaining is shown on the cockpit screen.</div>
+                break;
+
+            case RushRacing.Core.Enums.SessionStatus.Completed:
+                <div class="status success">✅ Session Complete</div>
+                <div class="info">Thanks for racing with Rush Racing!</div>
+                break;
+
+            default:
+                <div class="status">Status: @Model.Status</div>
+                break;
+        }
+    </div>
+</body>
+</html>

@@ -1,0 +1,119 @@
+﻿@{
+    var machine = ViewBag.Machine as RushRacing.Core.Entities.Machine;
+    var plans = ViewBag.Plans as List<RushRacing.Core.Entities.PricingPlan>;
+    Layout = null;
+}
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+    <title>Rush Racing — @machine.DisplayName</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            background: #0a0a1a;
+            color: white;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 20px;
+        }
+        .logo {
+            font-size: 28px;
+            font-weight: 900;
+            letter-spacing: 2px;
+            margin: 20px 0 8px;
+            color: #ff3333;
+        }
+        .machine-name {
+            font-size: 14px;
+            color: #888;
+            margin-bottom: 30px;
+        }
+        .heading {
+            font-size: 20px;
+            font-weight: 700;
+            margin-bottom: 24px;
+        }
+        .plans {
+            width: 100%;
+            max-width: 400px;
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+        .plan-card {
+            background: #1a1a2e;
+            border: 2px solid #2a2a4a;
+            border-radius: 16px;
+            padding: 20px 24px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            text-decoration: none;
+            color: white;
+        }
+        .plan-card:hover, .plan-card:active {
+            border-color: #ff3333;
+            background: #1e1e36;
+            transform: scale(1.02);
+        }
+        .plan-duration {
+            font-size: 22px;
+            font-weight: 700;
+        }
+        .plan-price {
+            font-size: 22px;
+            font-weight: 700;
+            color: #ff3333;
+        }
+        .plan-unit {
+            font-size: 12px;
+            color: #888;
+        }
+        .footer {
+            margin-top: 40px;
+            font-size: 12px;
+            color: #555;
+            text-align: center;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="logo">🏁 RUSH RACING</div>
+    <div class="machine-name">@machine.DisplayName</div>
+
+    <div class="heading">Select Your Session</div>
+
+    <div class="plans">
+        @foreach (var plan in plans)
+        {
+            <form method="post" action="/race/@machine.Slug/book">
+                <input type="hidden" name="pricingPlanId" value="@plan.PricingPlanId" />
+                <button type="submit" class="plan-card">
+                    <div>
+                        <div class="plan-duration">@plan.DurationMinutes min</div>
+                    </div>
+                    <div style="text-align: right;">
+                        <div class="plan-price">RM @plan.PriceAmount.ToString("F0")</div>
+                        <div class="plan-unit">@((plan.PriceAmount / plan.DurationMinutes).ToString("F2"))/min</div>
+                    </div>
+                </button>
+            </form>
+        }
+    </div>
+
+    <div class="footer">
+        <p>One game per session • Game selection on cockpit screen</p>
+        <p style="margin-top: 8px;">Problems? WhatsApp: +60XX-XXXXXXX</p>
+    </div>
+
+</body>
+</html>

@@ -1,0 +1,21 @@
+﻿<Window x:Class="RushRacing.Kiosk.Windows.TimerOverlayWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        WindowStyle="None"
+        AllowsTransparency="True"
+        Background="Transparent"
+        Topmost="True"
+        ShowInTaskbar="False"
+        ResizeMode="NoResize"
+        Width="180" Height="60">
+    <Border Background="#CC000000" CornerRadius="8" Padding="16,8">
+        <TextBlock x:Name="TimerText"
+                   Text="00:00"
+                   Foreground="Red"
+                   FontFamily="Consolas"
+                   FontSize="30"
+                   FontWeight="Bold"
+                   HorizontalAlignment="Center"
+                   VerticalAlignment="Center"/>
+    </Border>
+</Window>

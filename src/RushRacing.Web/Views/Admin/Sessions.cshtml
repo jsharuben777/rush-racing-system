@@ -1,0 +1,238 @@
+﻿@{
+    Layout = null;
+    var sessions = ViewBag.Sessions as List<RushRacing.Core.Entities.Session>;
+    int currentPage = ViewBag.CurrentPage;
+    int totalPages = ViewBag.TotalPages;
+    string statusFilter = ViewBag.StatusFilter ?? "";
+}
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Rush Racing — Sessions</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            background: #0a0a1a;
+            color: white;
+            padding: 20px;
+        }
+
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 30px;
+        }
+
+        .logo {
+            font-size: 24px;
+            font-weight: 900;
+            color: #ff3333;
+        }
+
+        .nav a {
+            color: #888;
+            text-decoration: none;
+            margin-left: 20px;
+            font-size: 14px;
+        }
+
+            .nav a:hover {
+                color: white;
+            }
+
+            .nav a.active {
+                color: #ff3333;
+            }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        th {
+            text-align: left;
+            padding: 10px 12px;
+            color: #888;
+            font-size: 12px;
+            border-bottom: 1px solid #2a2a4a;
+        }
+
+        td {
+            padding: 10px 12px;
+            font-size: 13px;
+            border-bottom: 1px solid #1a1a2e;
+            color: #ccc;
+        }
+
+        tr:hover {
+            background: #1a1a2e;
+        }
+
+        a {
+            color: #ff3333;
+            text-decoration: none;
+        }
+
+        .badge {
+            display: inline-block;
+            padding: 2px 10px;
+            border-radius: 20px;
+            font-size: 11px;
+            font-weight: 700;
+        }
+
+        .badge-completed {
+            background: #1a3a1a;
+            color: #28a745;
+        }
+
+        .badge-active {
+            background: #3a1a1a;
+            color: #ff3333;
+        }
+
+        .badge-paid {
+            background: #1a2a3a;
+            color: #3399ff;
+        }
+
+        .badge-error {
+            background: #3a2a1a;
+            color: #ff6600;
+        }
+
+        .badge-failed {
+            background: #2a2a2a;
+            color: #888;
+        }
+
+        .pagination {
+            margin-top: 20px;
+            text-align: center;
+        }
+
+            .pagination a {
+                color: #888;
+                margin: 0 8px;
+                text-decoration: none;
+                padding: 6px 14px;
+                border-radius: 8px;
+            }
+
+                .pagination a.current {
+                    background: #ff3333;
+                    color: white;
+                }
+
+                .pagination a:hover {
+                    color: white;
+                }
+
+        .filters {
+            margin-bottom: 20px;
+        }
+
+            .filters a {
+                color: #888;
+                margin-right: 12px;
+                text-decoration: none;
+                font-size: 13px;
+                padding: 4px 12px;
+                border-radius: 20px;
+            }
+
+                .filters a.active {
+                    background: #ff3333;
+                    color: white;
+                }
+
+                .filters a:hover {
+                    color: white;
+                }
+    </style>
+</head>
+<body>
+
+    <div class="header">
+        <div class="logo">🏁 RUSH RACING</div>
+        <div class="nav">
+            <a href="/admin/dashboard">Dashboard</a>
+            <a href="/admin/sessions" class="active">Sessions</a>
+            <a href="/admin/machines">Machines</a>
+            <a href="/admin/revenue">Revenue</a>
+            <a href="/admin/events">Events</a>
+            <a href="/admin/logout">Logout</a>
+        </div>
+    </div>
+
+    <h2 style="margin-bottom:16px;">Sessions</h2>
+
+    <div class="filters">
+        <a href="/admin/sessions" class="@(string.IsNullOrEmpty(statusFilter) ? "active" : "")">All</a>
+        <a href="/admin/sessions?status=Active" class="@(statusFilter == "Active" ? "active" : "")">Active</a>
+        <a href="/admin/sessions?status=Completed" class="@(statusFilter == "Completed" ? "active" : "")">Completed</a>
+        <a href="/admin/sessions?status=MachineError" class="@(statusFilter == "MachineError" ? "active" : "")">Errors</a>
+        <a href="/admin/sessions?status=Refunded" class="@(statusFilter == "Refunded" ? "active" : "")">Refunded</a>
+    </div>
+
+    <table>
+        <thead>
+            <tr>
+                <th>Session</th>
+                <th>Machine</th>
+                <th>Game</th>
+                <th>Duration</th>
+                <th>Amount</th>
+                <th>Status</th>
+                <th>Created</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var session in sessions)
+            {
+                var badgeClass = session.Status switch
+                {
+                    RushRacing.Core.Enums.SessionStatus.Completed => "badge-completed",
+                    RushRacing.Core.Enums.SessionStatus.Active => "badge-active",
+                    RushRacing.Core.Enums.SessionStatus.Paid => "badge-paid",
+                    RushRacing.Core.Enums.SessionStatus.Starting => "badge-paid",
+                    RushRacing.Core.Enums.SessionStatus.MachineError => "badge-error",
+                    _ => "badge-failed"
+                };
+
+                <tr>
+                    <td><a href="/admin/session/@session.SessionCode">@session.SessionCode</a></td>
+                    <td>@session.Machine?.DisplayName</td>
+                    <td>@(session.SelectedGame?.DisplayName ?? "-")</td>
+                    <td>@session.DurationMinutes min</td>
+                    <td>RM @session.PriceAmount.ToString("F2")</td>
+                    <td><span class="badge @badgeClass">@session.Status</span></td>
+                    <td>@session.CreatedAt.ToLocalTime().ToString("dd/MM HH:mm")</td>
+                </tr>
+            }
+        </tbody>
+    </table>
+
+    @if (totalPages > 1)
+    {
+        <div class="pagination">
+            @for (int i = 1; i <= totalPages; i++)
+            {
+                <a href="/admin/sessions?page=@i&status=@statusFilter"
+                   class="@(i == currentPage ? "current" : "")">@i</a>
+            }
+        </div>
+    }
+
+</body>
+</html>
