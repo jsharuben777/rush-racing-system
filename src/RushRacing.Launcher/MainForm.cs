@@ -127,6 +127,10 @@ public class MainForm : Form
             Log($"PublicBookingUrl set to: {newPublicUrl}");
             _urlBox.Text = newPublicUrl;
 
+            SetStatus("Updating Web configuration...");
+            PatchWebConfig(tunnelUrl);
+            Log($"Web PublicBaseUrl set to: {tunnelUrl}");
+
             SetStatus("Starting RushRacing.Web...");
             _webProcess = StartDotnetRun(GetFullPath(_config.WebProjectRelativePath), "RushRacing.Web");
 
@@ -220,6 +224,28 @@ public class MainForm : Form
 
         File.WriteAllText(settingsPath, root.ToJsonString(new JsonSerializerOptions { WriteIndented = true }));
         return newUrl;
+    }
+
+    private void PatchWebConfig(string tunnelUrl)
+    {
+        var webDir = GetFullPath(_config.WebProjectRelativePath);
+        var settingsPath = Path.Combine(webDir, "appsettings.json");
+
+        if (!File.Exists(settingsPath))
+            throw new FileNotFoundException($"Could not find Web appsettings.json at: {settingsPath}");
+
+        var jsonText = File.ReadAllText(settingsPath);
+        var root = JsonNode.Parse(jsonText)!.AsObject();
+
+        if (root["RushRacing"] is not JsonObject rushRacingSection)
+        {
+            rushRacingSection = new JsonObject();
+            root["RushRacing"] = rushRacingSection;
+        }
+
+        rushRacingSection["PublicBaseUrl"] = tunnelUrl.TrimEnd('/');
+
+        File.WriteAllText(settingsPath, root.ToJsonString(new JsonSerializerOptions { WriteIndented = true }));
     }
 
     private Process StartDotnetRun(string workingDirectory, string label)

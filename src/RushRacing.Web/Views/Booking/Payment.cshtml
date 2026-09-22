@@ -1,6 +1,7 @@
-﻿@model RushRacing.Core.Entities.Session
+@model RushRacing.Core.Entities.Session
 @{
     Layout = null;
+    var error = ViewBag.Error as string;
 }
 
 <!DOCTYPE html>
@@ -73,10 +74,45 @@
             color: #ff3333;
         }
 
+        .error-banner {
+            margin-top: 16px;
+            padding: 10px 14px;
+            background: #3a1414;
+            border: 1px solid #ff3333;
+            border-radius: 10px;
+            color: #ff9999;
+            font-size: 13px;
+            text-align: left;
+        }
+
+        .email-label {
+            display: block;
+            text-align: left;
+            font-size: 13px;
+            color: #888;
+            margin-top: 20px;
+            margin-bottom: 6px;
+        }
+
+        .email-input {
+            width: 100%;
+            padding: 12px 14px;
+            background: #0f0f22;
+            border: 2px solid #2a2a4a;
+            border-radius: 10px;
+            color: white;
+            font-size: 15px;
+        }
+
+        .email-input:focus {
+            outline: none;
+            border-color: #ff3333;
+        }
+
         .pay-btn {
             width: 100%;
             padding: 16px;
-            margin-top: 24px;
+            margin-top: 20px;
             background: #ff3333;
             color: white;
             border: none;
@@ -116,13 +152,17 @@
             <span class="total-amount">RM @Model.PriceAmount.ToString("F2")</span>
         </div>
 
-        <!--
-            MVP PLACEHOLDER:
-            This button will be replaced with actual payment provider integration.
-            For development/testing, this simulates a successful payment.
-        -->
-        <form method="post" action="/api/payment/simulate">
-            <input type="hidden" name="sessionCode" value="@Model.SessionCode" />
+        @if (!string.IsNullOrEmpty(error))
+        {
+            <div class="error-banner">@error</div>
+        }
+
+        <form method="post" action="/race/payment/@Model.SessionCode/create-bill">
+            <label for="email" class="email-label">Email (for your receipt)</label>
+            <input type="email" id="email" name="email" required
+                   placeholder="you@example.com" class="email-input"
+                   value="@Model.CustomerEmail" />
+
             <button type="submit" class="pay-btn">
                 PAY RM @Model.PriceAmount.ToString("F2")
             </button>

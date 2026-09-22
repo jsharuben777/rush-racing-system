@@ -1,8 +1,10 @@
-﻿using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.AspNetCore.Mvc;
+using RushRacing.Core.Entities;
 using RushRacing.Core.Enums;
 using RushRacing.Core.Interfaces;
 using RushRacing.Data;
+using RushRacing.Web.Services;
 
 namespace RushRacing.Web.Controllers;
 
@@ -11,15 +13,21 @@ public class BookingController : Controller
     private readonly RushRacingDbContext _db;
     private readonly ISessionService _sessionService;
     private readonly IMachineService _machineService;
+    private readonly IBillplzService _billplzService;
+    private readonly IConfiguration _configuration;
 
     public BookingController(
         RushRacingDbContext db,
         ISessionService sessionService,
-        IMachineService machineService)
+        IMachineService machineService,
+        IBillplzService billplzService,
+        IConfiguration configuration)
     {
         _db = db;
         _sessionService = sessionService;
         _machineService = machineService;
+        _billplzService = billplzService;
+        _configuration = configuration;
     }
 
     // GET: /race/ck01
@@ -93,10 +101,85 @@ public class BookingController : Controller
             return View("SessionInvalid");
 
         ViewBag.Session = session;
+        ViewBag.Error = TempData["Error"];
 
-        // For MVP: We will integrate with the payment provider here
-        // For now, show a payment page placeholder
         return View(session);
+    }
+
+    // POST: /race/payment/RR82931/create-bill
+    // Creates a Billplz Bill for this session and sends the customer to Billplz's hosted payment page.
+    [HttpPost("race/payment/{sessionCode}/create-bill")]
+    public async Task<IActionResult> CreateBill(string sessionCode, string email)
+    {
+        var session = await _sessionService.GetBySessionCode(sessionCode);
+
+        if (session == null)
+            return View("SessionNotFound");
+
+        if (session.Status != SessionStatus.PendingPayment)
+            return View("SessionInvalid");
+
+        if (string.IsNullOrWhiteSpace(email) || !email.Contains('@'))
+        {
+            TempData["Error"] = "Please enter a valid email address.";
+            return RedirectToAction("Payment", new { sessionCode });
+        }
+
+        session.CustomerEmail = email;
+        await _db.SaveChangesAsync();
+
+        var baseUrl = _configuration["RushRacing:PublicBaseUrl"]?.TrimEnd('/');
+        if (string.IsNullOrEmpty(baseUrl))
+        {
+            // This means the tunnel URL hasn't been patched into appsettings.json —
+            // almost always because the Launcher wasn't used to start this app.
+            return StatusCode(500,
+                "Server is not configured with a public URL (RushRacing:PublicBaseUrl in appsettings.json). " +
+                "Start this app via the Launcher so the tunnel URL gets patched in automatically.");
+        }
+
+        var callbackUrl = $"{baseUrl}/webhooks/billplz/callback";
+        var redirectUrl = $"{baseUrl}/race/payment/{sessionCode}/redirect";
+
+        BillplzBill bill;
+        try
+        {
+            bill = await _billplzService.CreateBillAsync(session, email, callbackUrl, redirectUrl);
+        }
+        catch (Exception)
+        {
+            TempData["Error"] = "Could not reach the payment gateway. Please try again in a moment.";
+            // In a real deployment, log this exception via ILogger.
+            return RedirectToAction("Payment", new { sessionCode });
+        }
+
+        var payment = new Payment
+        {
+            SessionId = session.SessionId,
+            ExternalPaymentId = bill.Id,
+            PaymentProvider = "BILLPLZ",
+            Amount = session.PriceAmount,
+            Currency = session.Currency,
+            Status = PaymentStatus.Pending,
+            CreatedAt = DateTimeOffset.UtcNow
+        };
+        _db.Payments.Add(payment);
+        await _db.SaveChangesAsync();
+
+        return Redirect(bill.Url);
+    }
+
+    // GET: /race/payment/RR82931/redirect
+    // Billplz sends the customer's browser here after they finish paying.
+    // This is for UX only — the webhook callback is the real source of truth.
+    [HttpGet("race/payment/{sessionCode}/redirect")]
+    public IActionResult PaymentRedirect(string sessionCode)
+    {
+        // Verified only for logging purposes here; not used to decide anything,
+        // since the callback (server-to-server) already handles the real status update.
+        _ = _billplzService.VerifyQuerySignature(Request.Query);
+
+        return RedirectToAction("Status", new { sessionCode });
     }
 
     // GET: /race/status/RR82931

@@ -4,6 +4,7 @@ using RushRacing.Data;
 using RushRacing.Data.Services;
 using RushRacing.Web.BackgroundServices;
 using RushRacing.Web.Hubs;
+using RushRacing.Web.Services;
 using Microsoft.AspNetCore.Authentication;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -29,6 +30,10 @@ builder.Services.AddScoped<ISessionService, SessionService>();
 builder.Services.AddScoped<IMachineService, MachineService>();
 builder.Services.AddScoped<ISessionEventService, SessionEventService>();
 builder.Services.AddScoped<IAuditService, AuditService>();
+
+// Billplz payment gateway
+builder.Services.Configure<BillplzOptions>(builder.Configuration.GetSection("Billplz"));
+builder.Services.AddHttpClient<IBillplzService, BillplzService>();
 
 // SignalR (we will add the hub later)
 builder.Services.AddSignalR();
